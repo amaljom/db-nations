@@ -5,6 +5,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Scanner;
 
 public class Main {
 
@@ -26,9 +27,15 @@ public class Main {
 							+  "		ON countries.region_id = regions.region_id\r\n"
 							+  "	JOIN continents\r\n"
 							+  "		ON regions.continent_id = continents.continent_id\r\n"
-							+  " ORDER BY countries.name ";
+							+  " WHERE countries.name LIKE ?";
 			
 			PreparedStatement ps = con.prepareStatement(sql);
+			
+			Scanner sc = new Scanner(System.in);
+			System.out.print("inserisci il nome del Paese da ricercare: ");
+			String nationName = sc.nextLine();
+			
+			ps.setString(1,nationName + "%");
 			
 			ResultSet rs = ps.executeQuery();
 			
