@@ -52,8 +52,18 @@ public class Main {
 			ps.close();
 			
 			// ****************************
-			con = DriverManager.getConnection(url, user, password);
-			final String sql2 = "SELECT DISTINCT languages.language, country_stats.population, country_stats.gdp, country_stats.year\r\n"
+			// con = DriverManager.getConnection(url, user, password);
+			final String sql2 = "SELECT DISTINCT languages.language\r\n"
+							+ "FROM nations.country_stats\r\n"
+							+ "	JOIN countries\r\n"
+							+ "		ON country_stats.country_id = countries.country_id\r\n"
+							+ "	JOIN country_languages\r\n"
+							+ "		ON countries.country_id = country_languages.country_id\r\n"
+							+ "	JOIN languages\r\n"
+							+ "		ON country_languages.language_id = languages.language_id\r\n"
+							+ "WHERE countries.country_id = ? \r\n";
+			
+			final String sql3 = "SELECT DISTINCT languages.language, country_stats.population, country_stats.gdp, country_stats.year\r\n"
 							+ "FROM nations.country_stats\r\n"
 							+ "	JOIN countries\r\n"
 							+ "		ON country_stats.country_id = countries.country_id\r\n"
@@ -63,8 +73,9 @@ public class Main {
 							+ "		ON country_languages.language_id = languages.language_id\r\n"
 							+ "WHERE countries.country_id = ? \r\n"
 							+ "ORDER BY country_stats.year DESC LIMIT 1";
-	
+			
 			PreparedStatement ps1 = con.prepareStatement(sql2);
+			PreparedStatement ps2 = con.prepareStatement(sql3);
 			
 			
 			System.out.print("inserisci L'ID del Paese da ricercare: ");
@@ -72,21 +83,26 @@ public class Main {
 			
 			int id = Integer.parseInt(nationId);
 			ps1.setInt(1, id);
-			
+			ps2.setInt(1, id);
 			
 			ResultSet rs1 = ps1.executeQuery();
 			
 			while(rs1.next()) {
 				
 				final String language = rs1.getString(1);
-				final int population = rs1.getInt(2);
-				final String gdp = rs1.getString(3);
-				final int year = rs1.getInt(4);
 				
-				System.out.println(language + " - " + population + " - " + gdp + " - " + year);
+				System.out.println("Languages: " + language + " / ");
 			}
-			
+			ResultSet rs2 = ps2.executeQuery();
+			while(rs2.next()) {
+				
+				final int population = rs2.getInt(2);
+				final String gdp = rs2.getString(3);
+				final int year = rs2.getInt(4);
+				System.out.println("\nPopulation: " + population + "\nGDP: " + gdp + "\nYear: " + year);
+			}
 			ps1.close();
+			ps2.close();
 			
 			
 		} catch (SQLException ex) {
